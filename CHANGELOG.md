@@ -16,6 +16,7 @@ Three version numbers, each bumped only when its own part changes: `VERSION` (th
 - The picture never asks the TV for a key frame before the first frame came: scrcpy-server died on it on a stuck TV, and every client then started it again and again.
 - Arabic (العربية): the phone app, the web page (TV web page, computer app, the phone's Manage screen) and the TV apps' words; the web page turns right to left, while the remote's arrows, number keys, media keys and the TV's picture keep their sides.
 - Phone app away from home: a quick tap on the picture reaches the TV as one tap (it could arrive as a long press over mobile data); a pass TV Setup no longer takes is dropped and fetched again; the sound's HQ setting works when the TV sends AAC.
+- The TV's encoder list is kept per TV, so 🎧 starts about a second sooner after the first time.
 
 ## 0.45.0 - 2026-11-05
 
