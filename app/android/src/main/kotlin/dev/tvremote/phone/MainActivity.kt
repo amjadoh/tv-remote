@@ -358,6 +358,10 @@ class MainActivity : Activity(), Tv.Listener, SurfaceHolder.Callback {
         root.addView(settings, FrameLayout.LayoutParams(-1, -1))
         about = buildAbout()
         root.addView(about, FrameLayout.LayoutParams(-1, -1))
+        // right to left only where words are read (Settings, About, dialogs); the remote, its keys and the app tiles keep their
+        // sides whatever the language or the phone's own setting (◀ is the TV's left), as the user asked (2026-11-05)
+        window.decorView.layoutDirection = View.LAYOUT_DIRECTION_LTR
+        if (dev.tvremote.core.Words.rtl) { settings.layoutDirection = View.LAYOUT_DIRECTION_RTL; about.layoutDirection = View.LAYOUT_DIRECTION_RTL }
         irHost = buildIr()
         root.addView(irHost, FrameLayout.LayoutParams(-1, -1))
         managing = Managing(this, root)
@@ -571,7 +575,8 @@ class MainActivity : Activity(), Tv.Listener, SurfaceHolder.Callback {
         val dm = resources.displayMetrics
         pic = Tv(this, h, surface.holder.surface, prefs.getInt("quality", 1), maxOf(dm.widthPixels, dm.heightPixels), false, picListener,
             fps = prefs.getInt("picFps", 0), bitRate = prefs.getInt("picRate", 0) * 1_000_000, encoder = prefs.getString("picEnc", "auto")!!,
-            hand = prefs.contains("quality"))             // a level picked by hand is kept, even on a TV with little memory
+            hand = prefs.contains("quality"),             // a level picked by hand is kept, even on a TV with little memory
+            relay = pref("tvs:${entry ?: h}").takeIf { it.isNotEmpty() && dev.tvremote.core.ontv.Tailscale.isAddress(h) })   // away: TV Setup's picture (Tv.relay)
         picShown = false
         val mine = pic; val enc = prefs.getString("picEnc", "auto")!!
         if (enc != "auto") ui.postDelayed({                          // an encoder picked by hand that this TV does not have sends nothing: Auto would have moved on

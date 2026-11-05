@@ -52,6 +52,17 @@ Why some code looks odd ([the list](../DECISIONS.md)).
   TV's encoder are. Start of a picture: 0.93 s median, of which app_process 0.55 s, encoder start 0.23 s, ADB shells 0.13 s; the
   jar is pushed only when its size differs (cold push +0.26 s). Emulator numbers: only the page and server stages transfer.
 
+- **Away (a Tailscale address), the Phone app's picture comes from TV Setup's `/api/video`** (`Tv.relay`, the pass from
+  `AdbPrompt.token`, HTTPS 8766 pinned), not from a scrcpy-server it drives over ADB. Our ADB acks each packet only when it is
+  read (`Adb.kt`, no `delayed_ack`), so a stream has one packet in flight: on 5G with 25-53 ms ping, direct, the picture stuttered
+  at every size, and TV Setup's page on the same phone was smoother (the user, 2026-11-04, NVIDIA Shield). TV Setup talks to its
+  scrcpy at no distance and sends one plain TCP stream with its own CatchUp. Feeds sends no pts: the arrival time stands in (the
+  decoder only matches out to in). A key frame is asked for by joining again (Feeds asks scrcpy for one per new viewer). Keys stay
+  on the keys' session (the relay has no control socket to carry them). TV Setup not reachable, or refusing: ADB, as before.
+  TV Setup answering but sending no frame in 8 s: "error", **not** ADB (a second encoder on a TV whose own is stuck; the first try on
+  the Shield ended with its whole screen black for every app until it was restarted). A join again for a key frame at most once in
+  5 s: each is a key frame there, and with a browser watching at another size a restart of TV Setup's encoder (Feeds.video).
+
 ## Waits
 
 - **Waits and watchdogs use `System.nanoTime()`**, never the wall clock: a laptop lid closed mid-wait, or the TV setting its
