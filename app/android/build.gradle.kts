@@ -7,6 +7,12 @@ plugins {
 
 // This app's own version: the VERSION file next to this one; bump it only when this app (or app/shared) changes.
 val appVersion = (System.getenv("VERSION_NAME") ?: file("VERSION").readText()).trim()
+// this fork's debug builds carry the commit they were made from (About: 0.42.0-amjad.2d05a7e; "+" when built with changes not
+// committed yet): every build read the same 0.42.0-amjad, and two different builds could not be told apart (the user, 2026-11-05)
+val gitHead: String = try {
+    fun git(vararg a: String) = ProcessBuilder("git", *a).directory(rootDir).redirectErrorStream(true).start().inputStream.bufferedReader().readText().trim()
+    git("rev-parse", "--short=7", "HEAD") + (if (git("status", "--porcelain", "--untracked-files=no").isNotEmpty()) "+" else "")
+} catch (e: Exception) { "" }
 val keystore = file("signing.jks")                                    // git-ignored; build.sh creates one on the first build
 
 android {
@@ -39,7 +45,7 @@ android {
         }
         debug {
             if (keystore.exists()) signingConfig = signingConfigs.getByName("release")   // same key, so a debug build installs over a release
-            versionNameSuffix = "-amjad"                              // this fork's builds, told apart in About (Release.num reads "2-amjad" as 2)
+            versionNameSuffix = "-amjad" + (if (gitHead.isEmpty()) "" else ".$gitHead")   // told apart in About (Release.num reads "2-amjad.abc" as 2)
         }
     }
     androidResources {
