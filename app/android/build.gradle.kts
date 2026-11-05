@@ -37,7 +37,10 @@ android {
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "../shared/proguard-rules.pro")
             if (keystore.exists()) signingConfig = signingConfigs.getByName("release")
         }
-        debug { if (keystore.exists()) signingConfig = signingConfigs.getByName("release") }   // same key, so a debug build installs over a release
+        debug {
+            if (keystore.exists()) signingConfig = signingConfigs.getByName("release")   // same key, so a debug build installs over a release
+            versionNameSuffix = "-amjad"                              // this fork's builds, told apart in About (Release.num reads "2-amjad" as 2)
+        }
     }
     androidResources {
         noCompress += "jar"
