@@ -1,0 +1,26 @@
+# اختبارات وحدة shared على فروع المنظّم agent/** وعلى PRs. بدون أسرار، وصلاحية قراءة بس.
+name: Tests
+on:
+  push:
+    branches: ['agent/**']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  shared:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      # PerfBudgetTest يقيس السرعة بحدود وقت تعتمد على الجهاز، فيفشل على أجهزة GitHub الأبطأ. نستثنيه هنا بس.
+      - name: Run shared unit tests
+        run: |
+          printf 'allprojects { tasks.withType(Test).configureEach { filter { excludeTestsMatching "*PerfBudgetTest" } } }\n' > "$RUNNER_TEMP/ci-exclude.gradle"
+          cd app/gradle && ./gradlew --no-daemon -I "$RUNNER_TEMP/ci-exclude.gradle" :shared:testDebugUnitTest
