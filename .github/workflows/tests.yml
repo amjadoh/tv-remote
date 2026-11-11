@@ -1,0 +1,24 @@
+# اختبارات وحدة shared على فروع المنظّم agent/** وعلى PRs. بدون أسرار، وصلاحية قراءة بس.
+name: Tests
+on:
+  push:
+    branches: ['agent/**']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  shared:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: android-actions/setup-android@v3
+      - name: Run shared unit tests
+        run: cd app/gradle && ./gradlew --no-daemon :shared:testDebugUnitTest
